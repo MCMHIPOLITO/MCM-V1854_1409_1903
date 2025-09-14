@@ -90,4 +90,128 @@ export function transformFixture(fix: any) {
   // Adjust Dangerous Attacks according to period
   let dangerousAdjusted = { home: dangerous.home, away: dangerous.away };
   if (periodLabel === '1T') {
-    dangerousAdjus
+    dangerousAdjusted = { home: dangerous1HT.home, away: dangerous1HT.away };
+  } else if (periodLabel === '2T') {
+    dangerousAdjusted = {
+      home: Math.max(0, dangerous2HT.home - dangerous1HT.home),
+      away: Math.max(0, dangerous2HT.away - dangerous1HT.away),
+    };
+  }
+
+  // Derived
+  const crossBlocked = {
+    home: Math.max(0, crosses.home - crossAcc.home),
+    away: Math.max(0, crosses.away - crossAcc.away),
+  };
+  const timeInHalf = Math.max(1, minute || 1);
+  const speedH = Number((dangerousAdjusted.home / timeInHalf).toFixed(2));
+  const speedA = Number((dangerousAdjusted.away / timeInHalf).toFixed(2));
+  const speedSum = Number((speedH + speedA).toFixed(2));
+  const blockedValueHome = blockedShots.home + crossBlocked.home;
+  const blockedValueAway = blockedShots.away + crossBlocked.away;
+  const speedBlockedHome = Number((blockedValueHome / timeInHalf).toFixed(2));
+  const speedBlockedAway = Number((blockedValueAway / timeInHalf).toFixed(2));
+  const blockedAcum = Number(((blockedValueHome + blockedValueAway) / timeInHalf).toFixed(2));
+
+  return {
+    matchName,
+    minute,
+    periodLabel,
+    scoreHome,
+    scoreAway,
+    corners,
+    attacks,
+    dangerous,
+    dangerous1HT,
+    dangerous2HT,
+    dangerousAdjusted,
+    possession,
+    shotsOnTarget,
+    totalShots,
+    blockedShots,
+    crosses,
+    crossAcc,
+    reds,
+    crossBlocked,
+    speedH,
+    speedA,
+    speedSum,
+    blockedValueHome,
+    blockedValueAway,
+    speedBlockedHome,
+    speedBlockedAway,
+    blockedAcum,
+  };
+}
+
+export function flattenRow(tf: any) {
+  if (!tf) return null; // safety for skipped fixtures
+
+  const row: any = {
+    "Match": tf.matchName,
+    "Time": `${tf.minute}'`,
+    "Period": tf.periodLabel,
+    "Score\nHome": tf.scoreHome,
+    "Score\nAway": tf.scoreAway,
+    "Corners\nHome": tf.corners.home,
+    "Corners\nAway": tf.corners.away,
+    "Attacks\nHome": tf.attacks.home,
+    "Attacks\nAway": tf.attacks.away,
+    "Dangerous Attacks\nHome": tf.dangerousAdjusted.home,
+    "Dangerous Attacks\nAway": tf.dangerousAdjusted.away,
+    "Dangerous Attacks 1HT\nHome": tf.dangerous1HT.home,
+    "Dangerous Attacks 1HT\nAway": tf.dangerous1HT.away,
+    "Dangerous Attacks 2HT\nHome": tf.dangerous2HT.home,
+    "Dangerous Attacks 2HT\nAway": tf.dangerous2HT.away,
+    "Ball Possession\nHome %": tf.possession.home,
+    "Ball Possession\nAway %": tf.possession.away,
+    "Shots On Target\nHome": tf.shotsOnTarget.home,
+    "Shots On Target\nAway": tf.shotsOnTarget.away,
+    "Total Shots\nHome": tf.totalShots.home,
+    "Total Shots\nAway": tf.totalShots.away,
+    "Blocked Shots\nHome": tf.blockedShots.home,
+    "Blocked Shots\nAway": tf.blockedShots.away,
+    "Crosses\nHome": tf.crosses.home,
+    "Crosses\nAway": tf.crosses.away,
+    "Cross Accuracy\nHome": tf.crossAcc.home,
+    "Cross Accuracy\nAway": tf.crossAcc.away,
+    "Crosses blocked\nHome": tf.crossBlocked.home,
+    "Crosses blocked\nAway": tf.crossBlocked.away,
+    "Red Card\nHome": tf.reds.home,
+    "Red Card\nAway": tf.reds.away,
+    "Speed APPM\nH": tf.speedH.toFixed(2),
+    "Speed APPM\nA": tf.speedA.toFixed(2),
+    "Speed\nAcum": tf.speedSum,
+    "Blocked Value\nHome": tf.blockedValueHome,
+    "Blocked Value\nAway": tf.blockedValueAway,
+    "Speed Blocked\nHome": tf.speedBlockedHome,
+    "Speed Blocked\nAway": tf.speedBlockedAway,
+    "Blocked\nAcum": tf.blockedAcum,
+  };
+
+  // WPI calculation
+  const { WPI_HOME, WPI_AWAY } = calculateWPI(
+    tf.crosses.home,
+    tf.crosses.away,
+    tf.totalShots.home,
+    tf.totalShots.away
+  );
+  row["WPI\nHome"] = WPI_HOME.toFixed(1);
+  row["WPI\nAway"] = WPI_AWAY.toFixed(1);
+
+  return row;
+}
+
+export function calculateWPI(
+  crossesHome: number,
+  crossesAway: number,
+  totalShotsHome: number,
+  totalShotsAway: number
+) {
+  const wpiHome = totalShotsHome > 0 ? crossesHome / totalShotsHome : 0;
+  const wpiAway = totalShotsAway > 0 ? crossesAway / totalShotsAway : 0;
+  return {
+    WPI_HOME: wpiHome,
+    WPI_AWAY: wpiAway,
+  };
+}
