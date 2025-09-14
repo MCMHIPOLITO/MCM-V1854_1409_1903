@@ -1,12 +1,9 @@
-
 export function transformFixture(fix: any) {
   // 🚫 Skip finished matches
   if (fix.state_id === 3) {
     return null;
   }
 
-
-export function transformFixture(fix: any) {
   const homePart = fix?.participants?.find((p: any) => p?.meta?.location === 'home');
   const awayPart = fix?.participants?.find((p: any) => p?.meta?.location === 'away');
   const homeId = homePart?.id;
@@ -39,7 +36,7 @@ export function transformFixture(fix: any) {
     (s: any) => s.description === 'CURRENT' && s.participant_id == awayId
   )?.score?.goals ?? 0;
 
-  // Utility to get latest val for trend type and participant
+  // Utility functions
   function latestVal(id: number, pid: number) {
     const arr = (fix?.trends ?? []).filter((x: any) => x.type_id == id && x.participant_id == pid);
     if (arr.length === 0) return 0;
@@ -144,75 +141,5 @@ export function transformFixture(fix: any) {
     speedBlockedHome,
     speedBlockedAway,
     blockedAcum,
-  };
-}
-
-export function flattenRow(tf: any) {
-  const row: any = {
-    "Match": tf.matchName,
-    "Time": `${tf.minute}'`,
-    "Period": tf.periodLabel,
-    "Score\nHome": tf.scoreHome,   
-    "Score\nAway": tf.scoreAway,
-    "Corners\nHome": tf.corners.home,
-    "Corners\nAway": tf.corners.away,
-    "Attacks\nHome": tf.attacks.home,
-    "Attacks\nAway": tf.attacks.away,
-    "Dangerous Attacks\nHome": tf.dangerousAdjusted.home,
-    "Dangerous Attacks\nAway": tf.dangerousAdjusted.away,
-    "Dangerous Attacks 1HT\nHome": tf.dangerous1HT.home,
-    "Dangerous Attacks 1HT\nAway": tf.dangerous1HT.away,
-    "Dangerous Attacks 2HT\nHome": tf.dangerous2HT.home,
-    "Dangerous Attacks 2HT\nAway": tf.dangerous2HT.away,
-    "Ball Possession\nHome %": tf.possession.home,
-    "Ball Possession\nAway %": tf.possession.away,
-    "Shots On Target\nHome": tf.shotsOnTarget.home,
-    "Shots On Target\nAway": tf.shotsOnTarget.away,
-    "Total Shots\nHome": tf.totalShots.home,
-    "Total Shots\nAway": tf.totalShots.away,
-    "Blocked Shots\nHome": tf.blockedShots.home,
-    "Blocked Shots\nAway": tf.blockedShots.away,
-    "Crosses\nHome": tf.crosses.home,
-    "Crosses\nAway": tf.crosses.away,
-    "Cross Accuracy\nHome": tf.crossAcc.home,
-    "Cross Accuracy\nAway": tf.crossAcc.away,
-    "Crosses blocked\nHome": tf.crossBlocked.home,
-    "Crosses blocked\nAway": tf.crossBlocked.away,
-    "Red Card\nHome": tf.reds.home,
-    "Red Card\nAway": tf.reds.away,
-    "Speed APPM\nH": tf.speedH,
-    "Speed APPM\nA": tf.speedA,
-    "Speed\nAcum": tf.speedSum,
-    "Blocked Value\nHome": tf.blockedValueHome,
-    "Blocked Value\nAway": tf.blockedValueAway,
-    "Speed Blocked\nHome": tf.speedBlockedHome,
-    "Speed Blocked\nAway": tf.speedBlockedAway,
-    "Blocked\nAcum": tf.blockedAcum,
-  };
-
-  // WPI calculation
-  const { WPI_HOME, WPI_AWAY } = calculateWPI(
-    tf.crosses.home,
-    tf.crosses.away,
-    tf.totalShots.home,
-    tf.totalShots.away
-  );
-  row["WPI\nHome"] = WPI_HOME;
-  row["WPI\nAway"] = WPI_AWAY;
-
-  return row;
-}
-
-export function calculateWPI(
-  crossesHome: number,
-  crossesAway: number,
-  totalShotsHome: number,
-  totalShotsAway: number
-) {
-  const wpiHome = totalShotsHome > 0 ? crossesHome / totalShotsHome : 0;
-  const wpiAway = totalShotsAway > 0 ? crossesAway / totalShotsAway : 0;
-  return {
-    WPI_HOME: Number(wpiHome.toFixed(1)),
-    WPI_AWAY: Number(wpiAway.toFixed(1)),
   };
 }
