@@ -1,3 +1,11 @@
+
+export function transformFixture(fix: any) {
+  // 🚫 Skip finished matches
+  if (fix.state_id === 3) {
+    return null;
+  }
+
+
 export function transformFixture(fix: any) {
   const homePart = fix?.participants?.find((p: any) => p?.meta?.location === 'home');
   const awayPart = fix?.participants?.find((p: any) => p?.meta?.location === 'away');
